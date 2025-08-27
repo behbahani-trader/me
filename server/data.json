@@ -1,0 +1,18 @@
+{
+  "transactions": [],
+  "expenseCategories": [
+    { "value": "food", "label": "غذا" },
+    { "value": "transport", "label": "حمل و نقل" },
+    { "value": "entertainment", "label": "سرگرمی" },
+    { "value": "bills", "label": "قبوض" },
+    { "value": "other", "label": "متفرقه" }
+  ],
+  "incomeCategories": [
+    { "value": "salary", "label": "حقوق" },
+    { "value": "freelance", "label": "فریلنس" },
+    { "value": "gift", "label": "هدیه" },
+    { "value": "other", "label": "متفرقه" }
+  ],
+  "recurringTransactions": [],
+  "apiKey": null
+}
