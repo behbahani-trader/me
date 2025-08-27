@@ -1,0 +1,22 @@
+{
+  "short_name": "مدیر مالی",
+  "name": "دستیار هوش مصنوعی امور مالی شخصی",
+  "description": "یک برنامه حسابداری شخصی مدرن که به شما کمک می‌کند درآمد و هزینه‌های خود را ردیابی کنید.",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    },
+    {
+      "src": "/vite.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1e3a8a",
+  "background_color": "#111827"
+}

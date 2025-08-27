@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راهنمای نصب دستیار مالی هوشمند روی سرور اوبونتو</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Vazirmatn', sans-serif; }
+        .code-block { position: relative; }
+        .copy-btn { position: absolute; top: 0.5rem; left: 0.5rem; background-color: #374151; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.8rem; opacity: 0.5; transition: opacity 0.3s; }
+        .code-block:hover .copy-btn { opacity: 1; }
+        .copy-btn:hover { background-color: #4B5563; }
+        .copy-btn.copied { background-color: #10B981; }
+        kbd {
+            background-color: #4B5563;
+            border-radius: 3px;
+            border: 1px solid #5A6679;
+            box-shadow: 0 2px 0 #5A6679;
+            color: #F3F4F6;
+            font-size: 0.8em;
+            padding: 2px 6px;
+            margin: 0 2px;
+            position: relative;
+            top: -1px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
+        <!-- Header -->
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-4">
+            راهنمای نصب دستیار مالی هوشمند
+        </h1>
+        <p class="text-center text-gray-400 mb-8">
+            این راهنما شما را در فرآیند نصب و راه‌اندازی برنامه روی سرور Ubuntu 22.04 LTS راهنمایی می‌کند.
+        </p>
+
+        <!-- Section 1: Prerequisites -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold border-r-4 border-blue-500 pr-4 mb-4">۱. پیش‌نیازها</h2>
+            <ul class="list-disc list-inside space-y-2 text-gray-300 pr-2">
+                <li>یک سرور با سیستم‌عامل <strong>Ubuntu 22.04 LTS</strong> یا جدیدتر.</li>
+                <li>دسترسی به سرور از طریق SSH با دسترسی <strong>sudo</strong>.</li>
+                <li>یک <strong>کلید API گوگل Gemini</strong> معتبر برای استفاده از بخش تحلیل هوش مصنوعی.</li>
+                <li>(اختیاری اما پیشنهادی) یک دامنه که به IP سرور شما متصل شده باشد.</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Server Preparation -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold border-r-4 border-blue-500 pr-4 mb-4">۲. آماده‌سازی سرور</h2>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۲.۱. به‌روزرسانی سیستم</h3>
+                    <p class="mb-2 text-gray-400">ابتدا، لیست پکیج‌های سرور خود را به‌روز کرده و نرم‌افزارها را به آخرین نسخه ارتقا دهید.</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo apt update && sudo apt upgrade -y</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۲.۲. نصب Nginx</h3>
+                    <p class="mb-2 text-gray-400">ما از Nginx به عنوان وب سرور برای ارائه فایل‌های برنامه استفاده خواهیم کرد.</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo apt install nginx -y</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <p class="mt-2 text-gray-400">پس از نصب، وضعیت آن را بررسی کنید:</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo systemctl status nginx</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <p class="mt-2 text-gray-400">خروجی باید شامل <code class="bg-green-800 text-green-200 px-1 rounded">active (running)</code> باشد. برای خروج از این صفحه کلید <kbd>Q</kbd> را فشار دهید.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Application Deployment -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold border-r-4 border-blue-500 pr-4 mb-4">۳. استقرار برنامه</h2>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۳.۱. ایجاد دایرکتوری و فایل‌ها</h3>
+                    <p class="mb-2 text-gray-400">یک دایرکتوری برای نگهداری فایل‌های برنامه ایجاد کنید. ما از مسیر <code class="bg-gray-700 px-1 rounded">/var/www/finance-app</code> استفاده می‌کنیم که یک مسیر استاندارد برای وب‌سایت‌هاست.</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo mkdir -p /var/www/finance-app
+sudo chown -R $USER:$USER /var/www/finance-app
+cd /var/www/finance-app</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <p class="mt-4 mb-2 text-gray-400">حالا، باید تمام فایل‌های برنامه را در این دایرکتوری ایجاد کنید. ابتدا دایرکتوری‌های <code class="bg-gray-700 px-1 rounded">components</code> و <code class="bg-gray-700 px-1 rounded">services</code> را بسازید:</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">mkdir components services</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <div class="mt-4 text-yellow-300 bg-yellow-900/50 p-4 rounded-lg border border-yellow-700">
+                        <p class="font-bold mb-2">راهنمای ایجاد فایل‌ها:</p>
+                        <p class="mb-2">برای فایل اول، دستور <code class="bg-gray-700 px-1 rounded">nano index.html</code> را اجرا کنید، محتوای فایل <code class="bg-gray-700 px-1 rounded">index.html</code> که در اختیار دارید را کپی کرده و در ویرایشگر nano جای‌گذاری کنید. سپس با <kbd>Ctrl+X</kbd>، بعد <kbd>Y</kbd> و در نهایت <kbd>Enter</kbd> فایل را ذخیره کنید.</p>
+                        <p>این کار را برای **تمام ۲۳ فایل** برنامه در مسیر صحیح تکرار کنید (مثلاً برای فایل <code class="bg-gray-700 px-1 rounded">api.ts</code> باید دستور <code class="bg-gray-700 px-1 rounded">nano services/api.ts</code> را اجرا کنید).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Set API Key -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold border-r-4 border-emerald-500 pr-4 mb-4">۴. تنظیم کلید API (مرحله حیاتی)</h2>
+            <div class="space-y-4">
+                 <div class="p-4 rounded-lg bg-blue-900/50 border border-blue-500">
+                    <h4 class="font-bold text-blue-300 text-lg">روش صحیح و امن</h4>
+                    <p class="text-blue-300">این برنامه طوری طراحی شده است که کلید API شما را به صورت امن در حافظه محلی مرورگر (Local Storage) ذخیره کند. این کلید هرگز به سرور ارسال نمی‌شود و فقط برای شما قابل دسترسی است.</p>
+                </div>
+                <p class="text-gray-400">پس از اینکه برنامه را روی سرور قرار دادید و از طریق مرورگر به آن دسترسی پیدا کردید، مراحل زیر را برای فعال‌سازی بخش هوش مصنوعی دنبال کنید:</p>
+                <ol class="list-decimal list-inside space-y-2 text-gray-300 pr-2">
+                    <li>از منوی بالای صفحه، روی گزینه <strong>«تنظیمات»</strong> کلیک کنید.</li>
+                    <li>در بخش <strong>«کلید API هوش مصنوعی»</strong>، کلید API معتبر گوگل Gemini خود را در فیلد ورودی وارد کنید.</li>
+                    <li>روی دکمه <strong>«ذخیره کلید»</strong> کلیک کنید.</li>
+                </ol>
+                <p class="text-gray-400 mt-2">به همین سادگی! اکنون می‌توانید به صفحه <strong>«تحلیل هوش مصنوعی»</strong> بروید و از مشاور مالی هوشمند خود استفاده کنید. نیازی به تغییر هیچ‌کدام از فایل‌های برنامه نیست.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Nginx Configuration -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold border-r-4 border-blue-500 pr-4 mb-4">۵. پیکربندی Nginx</h2>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۵.۱. ایجاد فایل پیکربندی</h3>
+                    <p class="mb-2 text-gray-400">یک فایل پیکربندی جدید برای سایت خود در Nginx ایجاد کنید:</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo nano /etc/nginx/sites-available/finance-app</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۵.۲. افزودن محتوای پیکربندی</h3>
+                    <p class="mb-2 text-gray-400">محتوای زیر را در فایل باز شده جای‌گذاری کنید. اگر از دامنه استفاده می‌کنید، <code class="bg-gray-700 px-1 rounded">your_domain.com</code> را با دامنه خود جایگزین کنید. در غیر این صورت، آن خط را با <code class="bg-gray-700 px-1 rounded">server_name _;</code> جایگزین کنید تا با IP کار کند.</p>
+                     <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-nginx">server {
+    listen 80;
+    server_name your_domain.com www.your_domain.com;
+
+    root /var/www/finance-app;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۵.۳. فعال‌سازی سایت</h3>
+                    <p class="mb-2 text-gray-400">با ایجاد یک لینک سیمبولیک، این پیکربندی را فعال کنید:</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo ln -s /etc/nginx/sites-available/finance-app /etc/nginx/sites-enabled/</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <p class="mt-2 text-gray-400">برای جلوگیری از تداخل، پیکربندی پیش‌فرض را حذف کنید (اگر فعال است):</p>
+                     <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo rm /etc/nginx/sites-enabled/default</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۵.۴. تست و راه‌اندازی مجدد Nginx</h3>
+                    <p class="mb-2 text-gray-400">ابتدا صحت سینتکس فایل پیکربندی را بررسی کنید:</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo nginx -t</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <p class="mt-2 text-gray-400">اگر خروجی <code class="bg-green-800 text-green-200 px-1 rounded">syntax is ok</code> و <code class="bg-green-800 text-green-200 px-1 rounded">test is successful</code> را مشاهده کردید، Nginx را برای اعمال تغییرات ری‌استارت کنید:</p>
+                     <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo systemctl restart nginx</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Final Steps -->
+        <section>
+            <h2 class="text-2xl font-bold border-r-4 border-emerald-500 pr-4 mb-4">۶. مراحل نهایی</h2>
+             <div class="space-y-6">
+                 <div>
+                    <h3 class="text-xl font-semibold mb-2">۶.۱. تنظیم فایروال</h3>
+                    <p class="mb-2 text-gray-400">اگر فایروال UFW فعال است، به Nginx اجازه دسترسی بدهید:</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo ufw allow 'Nginx Full'</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="text-xl font-semibold mb-2">۶.۲. دسترسی به برنامه</h3>
+                    <p class="mb-2 text-gray-400">نصب تمام شد! اکنون می‌توانید مرورگر خود را باز کرده و به آدرس دامنه یا IP سرور خود بروید تا برنامه را مشاهده کنید.</p>
+                    <p class="text-center p-4 bg-gray-900 rounded-lg text-lg">
+                        <a href="http://your_domain.com" class="text-emerald-400 hover:text-emerald-300">http://your_domain.com</a> 
+                        <span class="text-gray-500 mx-2">یا</span>
+                        <a href="#" class="text-emerald-400 hover:text-emerald-300">http://your_server_ip</a>
+                    </p>
+                </div>
+                <div class="pt-4">
+                    <h3 class="text-xl font-semibold mb-2 text-yellow-300">مرحله اختیاری: امن‌سازی با SSL (HTTPS)</h3>
+                    <p class="mb-2 text-gray-400">اگر از دامنه استفاده می‌کنید، به شدت توصیه می‌شود که با استفاده از Let's Encrypt یک گواهی SSL رایگان نصب کنید. این کار ارتباط را رمزنگاری و امن می‌کند.</p>
+                    <p class="mb-2 text-gray-400">ابتدا ابزارهای لازم را نصب کنید:</p>
+                     <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo apt install certbot python3-certbot-nginx -y</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <p class="mt-2 text-gray-400">سپس دستور زیر را اجرا کرده و مراحل را دنبال کنید (نام دامنه خود را جایگزین کنید):</p>
+                     <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">sudo certbot --nginx -d your_domain.com -d www.your_domain.com</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                     <p class="mt-2 text-gray-400">پس از اتمام، سایت شما به صورت خودکار از طریق <code class="bg-gray-700 px-1 rounded">https</code> در دسترس خواهد بود.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const code = button.previousElementSibling.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    button.textContent = 'کپی شد!';
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.textContent = 'کپی';
+                        button.classList.remove('copied');
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
