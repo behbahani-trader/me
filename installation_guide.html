@@ -111,7 +111,7 @@ npm run build
 npm run server</code></pre>
                         <button class="copy-btn">کپی</button>
                     </div>
-                    <p class="mt-2 text-gray-400">سرور بک‌اند به طور پیش‌فرض روی پورت <code class="bg-gray-700 px-1 rounded">3000</code> اجرا می‌شود.</p>
+                    <p class="mt-2 text-gray-400">سرور بک‌اند به طور پیش‌فرض روی پورت <code class="bg-gray-700 px-1 rounded">3131</code> اجرا می‌شود.</p>
                 </div>
                 </div>
             </div>
@@ -159,7 +159,7 @@ npm run server</code></pre>
     index index.html;
 
     location /api/ {
-        proxy_pass http://localhost:3000/api/;
+        proxy_pass http://localhost:3131/api/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
