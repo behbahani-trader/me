@@ -102,6 +102,17 @@ cd /var/www/finance-app</code></pre>
                         <p class="mb-2">برای فایل اول، دستور <code class="bg-gray-700 px-1 rounded">nano index.html</code> را اجرا کنید، محتوای فایل <code class="bg-gray-700 px-1 rounded">index.html</code> که در اختیار دارید را کپی کرده و در ویرایشگر nano جای‌گذاری کنید. سپس با <kbd>Ctrl+X</kbd>، بعد <kbd>Y</kbd> و در نهایت <kbd>Enter</kbd> فایل را ذخیره کنید.</p>
                         <p>این کار را برای **تمام ۲۳ فایل** برنامه در مسیر صحیح تکرار کنید (مثلاً برای فایل <code class="bg-gray-700 px-1 rounded">api.ts</code> باید دستور <code class="bg-gray-700 px-1 rounded">nano services/api.ts</code> را اجرا کنید).</p>
                     </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">۳.۲. نصب وابستگی‌ها و اجرای بک‌اند</h3>
+                    <p class="mb-2 text-gray-400">پس از ایجاد فایل‌ها، وابستگی‌ها را نصب کرده و برنامه را بسازید و سپس سرور بک‌اند را اجرا کنید:</p>
+                    <div class="code-block">
+                        <pre class="bg-gray-900 rounded p-4 text-white overflow-x-auto"><code class="language-bash">npm install
+npm run build
+npm run server</code></pre>
+                        <button class="copy-btn">کپی</button>
+                    </div>
+                    <p class="mt-2 text-gray-400">سرور بک‌اند به طور پیش‌فرض روی پورت <code class="bg-gray-700 px-1 rounded">3000</code> اجرا می‌شود.</p>
+                </div>
                 </div>
             </div>
         </section>
@@ -146,6 +157,12 @@ cd /var/www/finance-app</code></pre>
 
     root /var/www/finance-app;
     index index.html;
+
+    location /api/ {
+        proxy_pass http://localhost:3000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
 
     location / {
         try_files $uri $uri/ /index.html;

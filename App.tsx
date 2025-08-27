@@ -198,7 +198,8 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout }) => {
         const loadData = async () => {
             try {
                 const initialData = await api.getInitialData();
-                setApiKey(api.getApiKey());
+                const storedKey = await api.getApiKey();
+                setApiKey(storedKey);
                 
                 const { finalTransactions, finalRecurring, newTransactionsCount } = await processRecurringTransactions(
                     initialData.transactions,
@@ -368,13 +369,13 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout }) => {
         }
     };
 
-    const saveApiKeyHandler = (key: string) => {
-        api.saveApiKey(key);
+    const saveApiKeyHandler = async (key: string) => {
+        await api.saveApiKey(key);
         setApiKey(key);
     };
 
-    const removeApiKeyHandler = () => {
-        api.removeApiKey();
+    const removeApiKeyHandler = async () => {
+        await api.removeApiKey();
         setApiKey(null);
     };
 
