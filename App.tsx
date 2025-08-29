@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
-import { Transaction, TransactionType, Category, SortOptions, RecurringTransaction, Frequency, ThemeSettings } from './types';
+import { Transaction, TransactionType, Category, SortOptions, RecurringTransaction, Frequency, ThemeSettings, AIVoiceSettings } from './types';
 import { Summary } from './components/Summary';
 import { TransactionForm } from './components/TransactionForm';
 import { TransactionList } from './components/TransactionList';
@@ -127,6 +127,24 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout }) => {
     
     const [activePage, setActivePage] = useState<Page>('dashboard');
     const [sortOptions, setSortOptions] = useState<SortOptions>({ key: 'date', direction: 'desc' });
+    
+    const [aiVoiceSettings, setAiVoiceSettings] = useState<AIVoiceSettings>(() => {
+        try {
+            const saved = localStorage.getItem('aiVoiceSettings');
+            return saved ? JSON.parse(saved) : { voiceURI: null, rate: 1 };
+        } catch {
+            return { voiceURI: null, rate: 1 };
+        }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('aiVoiceSettings', JSON.stringify(aiVoiceSettings));
+    }, [aiVoiceSettings]);
+
+    const updateAiVoiceSettings = (newSettings: Partial<AIVoiceSettings>) => {
+        setAiVoiceSettings(prev => ({ ...prev, ...newSettings }));
+    };
+
 
     const processRecurringTransactions = useCallback(async (
         currentTransactions: Transaction[],
@@ -198,8 +216,7 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout }) => {
         const loadData = async () => {
             try {
                 const initialData = await api.getInitialData();
-                const storedKey = await api.getApiKey();
-                setApiKey(storedKey);
+                setApiKey(api.getApiKey());
                 
                 const { finalTransactions, finalRecurring, newTransactionsCount } = await processRecurringTransactions(
                     initialData.transactions,
@@ -369,13 +386,13 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout }) => {
         }
     };
 
-    const saveApiKeyHandler = async (key: string) => {
-        await api.saveApiKey(key);
+    const saveApiKeyHandler = (key: string) => {
+        api.saveApiKey(key);
         setApiKey(key);
     };
 
-    const removeApiKeyHandler = async () => {
-        await api.removeApiKey();
+    const removeApiKeyHandler = () => {
+        api.removeApiKey();
         setApiKey(null);
     };
 
@@ -522,7 +539,7 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout }) => {
                     </div>
                 );
             case 'analysis':
-                return <Analysis apiKey={apiKey} transactions={transactions} addTransaction={addTransaction} expenseCategories={expenseCategories} incomeCategories={incomeCategories} />;
+                return <Analysis apiKey={apiKey} transactions={transactions} addTransaction={addTransaction} expenseCategories={expenseCategories} incomeCategories={incomeCategories} aiVoiceSettings={aiVoiceSettings} />;
             case 'settings':
                 return <SettingsPage
                     apiKey={apiKey}
@@ -534,6 +551,8 @@ const MainApp: React.FC<MainAppProps> = ({ onLogout }) => {
                     onDownloadJson={downloadJson}
                     onUploadJson={uploadJson}
                     onLogout={onLogout}
+                    aiVoiceSettings={aiVoiceSettings}
+                    onUpdateAiVoiceSettings={updateAiVoiceSettings}
                 />;
             default:
                 return null;

@@ -24,6 +24,7 @@ export interface SortOptions {
 }
 
 export interface ChatMessage {
+  id: string;
   role: 'user' | 'model';
   content: string;
 }
@@ -49,4 +50,9 @@ export interface ThemeSettings {
   fontSize: 'sm' | 'base' | 'lg';
   backgroundStyle: 'solid' | 'gradient';
   glassmorphism: boolean;
+}
+
+export interface AIVoiceSettings {
+  voiceURI: string | null;
+  rate: number;
 }

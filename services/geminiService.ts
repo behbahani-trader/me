@@ -24,13 +24,18 @@ export function createAnalysisChat(
 
   const systemInstruction = `
     شما یک مشاور مالی متخصص، خوش‌بین و مفید هستید. وظیفه شما تحلیل داده‌های تراکنش‌های مالی شخصی کاربر و پاسخ به سوالات اوست.
-    شما همچنین یک ابزار قدرتمند برای کمک به کاربر در اختیار دارید: 'addTransaction'.
+    شما دو ابزار قدرتمند در اختیار دارید:
+    1. 'addTransactions': برای ثبت تراکنش‌های جدید.
+    2. 'getFinancialReport': برای تحلیل و گزارش‌گیری از داده‌های موجود.
 
-    **ابزار: addTransaction**
-    - از این ابزار زمانی استفاده کنید که کاربر از شما می‌خواهد یک تراکنش اضافه کنید، یا متنی شبیه به پیامک بانکی مربوط به واریز ('واریز') یا برداشت ('برداشت') ارائه می‌دهد.
-    - توضیحات، مبلغ و نوع تراکنش را از پیام کاربر استخراج کنید.
-    - برای پارامتر 'category'، شما **باید** یکی از مقادیر معتبر دسته‌بندی را از لیست‌های زیر انتخاب کنید. سعی کنید منطقی‌ترین گزینه را انتخاب کنید. اگر مطمئن نیستید، می‌توانید از کاربر برای شفاف‌سازی سوال کنید.
-    - همیشه برای واریز از نوع 'income' و برای برداشت از نوع 'expense' استفاده کنید.
+    **ابزار: addTransactions**
+    - از این ابزار زمانی استفاده کنید که کاربر از شما می‌خواهد یک یا چند تراکنش را اضافه کنید.
+    - اگر کاربر چندین مورد را در یک پیام ذکر کرد (مثلاً: '۵۰۰۰ تومان برای ناهار و ۲۰۰۰ تومان برای قهوه خرج کردم')، شما باید همه آنها را در یک فراخوانی ابزار به صورت لیستی از تراکنش‌ها ارسال کنید.
+    - برای پارامتر 'category'، شما **باید** یکی از مقادیر معتبر دسته‌بندی را از لیست‌های زیر انتخاب کنید.
+
+    **ابزار: getFinancialReport**
+    - برای پاسخ به سوالات کاربر در مورد تاریخچه مالی او (مثلاً 'هزینه‌های ماه قبل من چقدر بود؟' یا 'بیشترین درآمد من از کجا بوده؟')، از این ابزار استفاده کنید.
+    - پارامترهای لازم مانند بازه زمانی یا دسته‌بندی را از سوال کاربر استخراج کنید.
 
     **دسته‌بندی‌های هزینه موجود:**
     ${expenseCategoryList}
@@ -49,30 +54,54 @@ export function createAnalysisChat(
   const tools = [{
     functionDeclarations: [
       {
-        name: "addTransaction",
-        description: "یک تراکنش جدید درآمد یا هزینه را ثبت می‌کند.",
+        name: "addTransactions",
+        description: "یک یا چند تراکنش جدید درآمد یا هزینه را ثبت می‌کند.",
         parameters: {
           type: Type.OBJECT,
           properties: {
-            description: {
-              type: Type.STRING,
-              description: "توضیحی برای تراکنش، مثال: 'خرید از سوپرمارکت'",
-            },
-            amount: {
-              type: Type.NUMBER,
-              description: "مبلغ عددی تراکنش. باید یک عدد مثبت باشد.",
-            },
-            type: {
-              type: Type.STRING,
-              enum: ["income", "expense"],
-              description: "نوع تراکنش. 'income' برای وجه دریافتی، 'expense' برای وجه خرج شده.",
-            },
-            category: {
-              type: Type.STRING,
-              description: "مقدار (value) دسته‌بندی برای تراکنش. باید یکی از مقادیر معتبر ارائه شده باشد.",
+            transactions: {
+              type: Type.ARRAY,
+              description: "لیستی از تراکنش‌ها برای افزودن.",
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  description: {
+                    type: Type.STRING,
+                    description: "توضیحی برای تراکنش، مثال: 'خرید از سوپرمارکت'",
+                  },
+                  amount: {
+                    type: Type.NUMBER,
+                    description: "مبلغ عددی تراکنش. باید یک عدد مثبت باشد.",
+                  },
+                  type: {
+                    type: Type.STRING,
+                    enum: ["income", "expense"],
+                    description: "نوع تراکنش. 'income' برای وجه دریافتی، 'expense' برای وجه خرج شده.",
+                  },
+                  category: {
+                    type: Type.STRING,
+                    description: "مقدار (value) دسته‌بندی برای تراکنش. باید یکی از مقادیر معتبر ارائه شده باشد.",
+                  },
+                },
+                required: ["description", "amount", "type"],
+              },
             },
           },
-          required: ["description", "amount", "type"],
+          required: ["transactions"],
+        },
+      },
+      {
+        name: "getFinancialReport",
+        description: "گزارشی از داده‌های مالی کاربر بر اساس فیلترهای مشخص شده (مانند بازه زمانی یا دسته‌بندی) ایجاد می‌کند. از این ابزار برای پاسخ به سوالات مربوط به جمع‌بندی، روندها یا جزئیات داده‌های مالی استفاده کنید.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                startDate: { type: Type.STRING, description: "تاریخ شروع گزارش (فرمت: YYYY-MM-DD)." },
+                endDate: { type: Type.STRING, description: "تاریخ پایان گزارش (فرمت: YYYY-MM-DD)." },
+                transactionType: { type: Type.STRING, enum: ["income", "expense"], description: "فیلتر بر اساس نوع تراکنش." },
+                category: { type: Type.STRING, description: "فیلتر بر اساس مقدار (value) یک دسته‌بندی خاص." },
+            },
+            required: [],
         },
       },
     ],
